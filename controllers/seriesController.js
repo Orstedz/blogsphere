@@ -7,17 +7,13 @@ export async function getSeries(req, res) {
 }
 
 export async function createSeries(req, res) {
-  const { name, description, status } = req.validated;
-  return controller.create(req, res, {
-    name,
-    description,
-    status: status || "Active",
-  });
+  const { name, description } = req.validated;
+  return controller.create(req, res, { name, description });
 }
 
 export async function updateSeries(req, res) {
-  const { name, description, status } = req.validated;
-  return controller.update(req, res, { name, description, status });
+  const { name, description } = req.validated;
+  return controller.update(req, res, { name, description });
 }
 
 export async function deleteSeries(req, res) {
