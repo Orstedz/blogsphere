@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { getPool } from "../config/database.js";
 import sql from "mssql";
 
@@ -44,13 +43,11 @@ export class BaseController {
    */
   async create(req, res, fields) {
     try {
-      const id = uuidv4();
       const pool = getPool();
       const request = pool.request();
 
-      const columns = ["id"];
-      const values = ["@id"];
-      request.input("id", sql.NVarChar, id);
+      const columns = [];
+      const values = [];
 
       // Build dynamic query based on fields
       for (const [key, value] of Object.entries(fields)) {
@@ -59,15 +56,18 @@ export class BaseController {
         request.input(key, sql.NVarChar, value || null);
       }
 
-      await request.query(`
+      const result = await request.query(`
         INSERT INTO ${this.tableName} (${columns.join(", ")})
+        OUTPUT INSERTED.id
         VALUES (${values.join(", ")})
       `);
+
+      const newId = result.recordset[0].id;
 
       res.status(201).json({
         success: true,
         message: `${this.resourceName} created successfully`,
-        data: { id, ...fields },
+        data: { id: newId, ...fields },
       });
     } catch (err) {
       if (err.message.includes("UNIQUE")) {
@@ -94,7 +94,7 @@ export class BaseController {
       const request = pool.request();
 
       const setClauses = [];
-      request.input("id", sql.NVarChar, id);
+      request.input("id", sql.Int, id);
 
       // Build dynamic SET clause
       for (const [key, value] of Object.entries(fields)) {
@@ -133,7 +133,7 @@ export class BaseController {
       const { id } = req.params;
       const pool = getPool();
 
-      await pool.request().input("id", sql.NVarChar, id).query(`
+      await pool.request().input("id", sql.Int, id).query(`
         DELETE FROM ${this.tableName}
         WHERE id = @id
       `);
@@ -159,7 +159,7 @@ export class BaseController {
       const { id } = req.params;
       const pool = getPool();
 
-      const result = await pool.request().input("id", sql.NVarChar, id).query(`
+      const result = await pool.request().input("id", sql.Int, id).query(`
         SELECT * FROM ${this.tableName}
         WHERE id = @id
       `);
