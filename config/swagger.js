@@ -56,10 +56,9 @@ const options = {
           required: ["name"],
           properties: {
             id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               description: "Unique identifier",
-              example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              example: 1,
             },
             name: {
               type: "string",
@@ -71,17 +70,6 @@ const options = {
               nullable: true,
               description: "Category description",
               example: "Articles about technology and innovation",
-            },
-            is_deleted: {
-              type: "boolean",
-              description: "Soft delete flag",
-              example: false,
-            },
-            created_by: {
-              type: "string",
-              format: "uuid",
-              nullable: true,
-              description: "User who created this category",
             },
             created_at: {
               type: "string",
@@ -100,9 +88,9 @@ const options = {
           required: ["title", "content"],
           properties: {
             id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               description: "Unique identifier",
+              example: 1,
             },
             title: {
               type: "string",
@@ -116,21 +104,21 @@ const options = {
                 "React is a JavaScript library for building user interfaces...",
             },
             category_id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               nullable: true,
               description: "Associated category ID",
+              example: 1,
             },
             series_id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               nullable: true,
               description: "Associated series ID",
+              example: 1,
             },
             author_id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               description: "Author user ID",
+              example: 1,
             },
             status: {
               type: "string",
@@ -153,9 +141,9 @@ const options = {
           required: ["name"],
           properties: {
             id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               description: "Unique identifier",
+              example: 1,
             },
             name: {
               type: "string",
@@ -167,17 +155,6 @@ const options = {
               nullable: true,
               description: "Series description",
               example: "A comprehensive guide to React basics",
-            },
-            status: {
-              type: "string",
-              enum: ["Active", "Inactive"],
-              description: "Series status",
-              example: "Active",
-            },
-            created_by: {
-              type: "string",
-              format: "uuid",
-              nullable: true,
             },
             created_at: {
               type: "string",
@@ -194,9 +171,9 @@ const options = {
           required: ["username", "email", "password"],
           properties: {
             id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               description: "Unique identifier",
+              example: 1,
             },
             username: {
               type: "string",
@@ -205,21 +182,19 @@ const options = {
             },
             email: {
               type: "string",
-              format: "email",
               description: "Email address",
               example: "john@example.com",
             },
             password: {
               type: "string",
-              format: "password",
               description: "User password (hashed in storage)",
               example: "SecurePass123!",
             },
             role_id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               nullable: true,
               description: "Assigned role ID",
+              example: 1,
             },
             created_at: {
               type: "string",
@@ -236,9 +211,9 @@ const options = {
           required: ["name"],
           properties: {
             id: {
-              type: "string",
-              format: "uuid",
+              type: "integer",
               description: "Unique identifier",
+              example: 1,
             },
             name: {
               type: "string",
