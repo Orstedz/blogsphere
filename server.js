@@ -38,6 +38,10 @@ app.use("/api/series", seriesRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/roles", rolesRouter);
 
+app.get("/", (req, res) => {
+  res.json({ message: "BlogSphere API is running", version: "1.0.0" });
+});
+
 // Error handling
 app.use(notFoundHandler);
 app.use(errorHandler);
