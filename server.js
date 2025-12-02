@@ -21,21 +21,26 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Apply Helmet with CSP disabled for /api-docs routes
+// Apply Helmet with conditional CSP
 app.use((req, res, next) => {
   if (req.path.startsWith('/api-docs')) {
-    return next();
-  }
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:"],
+    // Disable CSP entirely for Swagger UI
+    helmet({
+      contentSecurityPolicy: false,
+    })(req, res, next);
+  } else {
+    // Apply CSP for other routes
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", "data:", "https:"],
+        },
       },
-    },
-  })(req, res, next);
+    })(req, res, next);
+  }
 });
 
 // Swagger Documentation
