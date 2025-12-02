@@ -18,27 +18,29 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:"],
-      },
-    },
-  })
-);
 app.use(cors());
 app.use(express.json());
 
-// Swagger Documentation
+// Swagger Documentation - No CSP for Swagger UI
 app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     customSiteTitle: "BlogSphere API Documentation",
+  })
+);
+
+// Apply Helmet after Swagger to avoid CSP blocking Swagger UI
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
   })
 );
 
