@@ -36,8 +36,8 @@ const router = express.Router();
  *                 format: email
  *               password:
  *                 type: string
- *               role_id:
- *                 type: string
+ *               role:
+ *                 type: integer
  *     responses:
  *       201:
  *         description: User created

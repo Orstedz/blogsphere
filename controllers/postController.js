@@ -1,24 +1,17 @@
-import { getPool } from "../config/database.js";
-import sql from "mssql";
+import Post from "../models/Post.js";
+import User from "../models/User.js";
 
 export async function getPosts(req, res) {
   try {
-    const pool = getPool();
-    const result = await pool.request().query(`
-        SELECT 
-          p.id, p.title, p.content, p.category_id, c.name as category_name,
-          p.series_id, s.name as series_name, p.author_id, u.username as author_name,
-          p.status, p.created_at, p.updated_at
-        FROM Posts p
-        LEFT JOIN Categories c ON p.category_id = c.id
-        LEFT JOIN Series s ON p.series_id = s.id
-        LEFT JOIN Users u ON p.author_id = u.id
-        ORDER BY p.created_at DESC
-      `);
+    const posts = await Post.find()
+      .populate("category", "name")
+      .populate("series", "name")
+      .populate("author", "username email")
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      data: result.recordset,
+      data: posts,
     });
   } catch (err) {
     res.status(500).json({
@@ -31,42 +24,40 @@ export async function getPosts(req, res) {
 
 export async function createPost(req, res) {
   try {
-    const { title, content, category_id, series_id, status } = req.validated;
-    const pool = getPool();
+    const { title, content, category, series, status } = req.validated;
 
     // Get the latest user ID from the database (most recently created user)
-    const userResult = await pool.request().query(`
-      SELECT TOP 1 id FROM Users ORDER BY created_at DESC
-    `);
+    const defaultUser = await User.findOne().sort({ createdAt: -1 });
 
-    const defaultUserId = userResult.recordset[0]?.id || null;
-
-    if (!defaultUserId) {
+    if (!defaultUser) {
       return res.status(400).json({
         success: false,
         message: "No users found. Please create a user first.",
       });
     }
 
-    const result = await pool
-      .request()
-      .input("title", sql.NVarChar, title)
-      .input("content", sql.NVarChar, content)
-      .input("category_id", sql.Int, category_id || null)
-      .input("series_id", sql.Int, series_id || null)
-      .input("author_id", sql.Int, defaultUserId)
-      .input("status", sql.NVarChar, status || "Draft").query(`
-        INSERT INTO Posts (title, content, category_id, series_id, author_id, status)
-        OUTPUT INSERTED.id
-        VALUES (@title, @content, @category_id, @series_id, @author_id, @status)
-      `);
+    const newPost = new Post({
+      title,
+      content,
+      category,
+      series,
+      author: defaultUser._id,
+      status: status || "Draft",
+    });
 
-    const newId = result.recordset[0].id;
+    await newPost.save();
+
+    // Populate the references before returning
+    await newPost.populate([
+      { path: "category", select: "name" },
+      { path: "series", select: "name" },
+      { path: "author", select: "username email" },
+    ]);
 
     res.status(201).json({
       success: true,
       message: "Post created successfully",
-      data: { id: newId },
+      data: newPost,
     });
   } catch (err) {
     res.status(500).json({
@@ -80,46 +71,28 @@ export async function createPost(req, res) {
 export async function updatePost(req, res) {
   try {
     const { id } = req.params;
-    const { title, content, category_id, series_id, status } = req.validated;
-    const pool = getPool();
+    const { title, content, category, series, status } = req.validated;
 
-    const fields = [];
-    const request = pool.request();
+    const updatedPost = await Post.findByIdAndUpdate(
+      id,
+      { title, content, category, series, status },
+      { new: true, runValidators: true, omitUndefined: true }
+    )
+      .populate("category", "name")
+      .populate("series", "name")
+      .populate("author", "username email");
 
-    request.input("id", sql.Int, id);
-
-    if (title !== undefined) {
-      fields.push("title = @title");
-      request.input("title", sql.NVarChar, title);
+    if (!updatedPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
     }
-    if (content !== undefined) {
-      fields.push("content = @content");
-      request.input("content", sql.NVarChar, content);
-    }
-    if (category_id !== undefined) {
-      fields.push("category_id = @category_id");
-      request.input("category_id", sql.Int, category_id);
-    }
-    if (series_id !== undefined) {
-      fields.push("series_id = @series_id");
-      request.input("series_id", sql.Int, series_id);
-    }
-    if (status !== undefined) {
-      fields.push("status = @status");
-      request.input("status", sql.NVarChar, status);
-    }
-
-    fields.push("updated_at = GETUTCDATE()");
-
-    await request.query(`
-      UPDATE Posts
-      SET ${fields.join(", ")}
-      WHERE id = @id
-    `);
 
     res.json({
       success: true,
       message: "Post updated successfully",
+      data: updatedPost,
     });
   } catch (err) {
     res.status(500).json({
@@ -133,12 +106,15 @@ export async function updatePost(req, res) {
 export async function deletePost(req, res) {
   try {
     const { id } = req.params;
-    const pool = getPool();
 
-    await pool.request().input("id", sql.Int, id).query(`
-        DELETE FROM Posts
-        WHERE id = @id
-      `);
+    const deletedPost = await Post.findByIdAndDelete(id);
+
+    if (!deletedPost) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
 
     res.json({
       success: true,

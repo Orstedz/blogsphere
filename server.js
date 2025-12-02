@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
-import { connectToDatabase, closePool } from "./config/database.js";
+import { connectToDatabase, closeConnection } from "./config/database.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { swaggerSpec } from "./config/swagger.js";
 import categoriesRouter from "./routes/categories.js";
@@ -63,7 +63,7 @@ async function startServer() {
 // Shutdown
 process.on("SIGINT", async () => {
   console.log("\nShutting down...");
-  await closePool();
+  await closeConnection();
   process.exit(0);
 });
 

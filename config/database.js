@@ -1,44 +1,21 @@
-import sql from "mssql";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const config = {
-  server: process.env.DB_SERVER || "localhost",
-  database: process.env.DB_NAME || "BlogSphereDB",
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  options: {
-    encrypt: process.env.DB_ENCRYPT === "true",
-    trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE !== "false",
-    enableArithAbort: true,
-    connectionTimeout: 30000,
-    requestTimeout: 30000,
-    instanceName: process.env.DB_INSTANCE || undefined,
-  },
-};
-
-let pool = null;
+import mongoose from "mongoose";
 
 export async function connectToDatabase() {
   try {
-    pool = new sql.ConnectionPool(config);
-    await pool.connect();
-    console.log("Database connection established!");
-    return pool;
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected successfully!");
+    return mongoose.connection;
   } catch (err) {
-    console.error("Database connection failed:", err.message);
+    console.error("MongoDB connection failed:", err.message);
     throw err;
   }
 }
 
-export function getPool() {
-  return pool;
-}
-
-export async function closePool() {
-  if (pool) {
-    await pool.close();
-    console.log("Database connection closed!");
+export async function closeConnection() {
+  try {
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed!");
+  } catch (err) {
+    console.error("Error closing MongoDB connection:", err.message);
   }
 }

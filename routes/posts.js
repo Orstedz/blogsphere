@@ -33,10 +33,10 @@ const router = express.Router();
  *                 type: string
  *               content:
  *                 type: string
- *               category_id:
- *                 type: string
- *               series_id:
- *                 type: string
+ *               category:
+ *                 type: integer
+ *               series:
+ *                 type: integer
  *               status:
  *                 type: string
  *                 enum: [Draft, Published, Archived]

@@ -1,21 +1,14 @@
-import { getPool } from "../config/database.js";
-import sql from "mssql";
+import User from "../models/User.js";
 
 export async function getUsers(req, res) {
   try {
-    const pool = getPool();
-    const result = await pool.request().query(`
-        SELECT 
-          u.id, u.username, u.email, u.role_id, r.name as role_name,
-          u.created_at, u.updated_at
-        FROM Users u
-        LEFT JOIN Roles r ON u.role_id = r.id
-        ORDER BY u.created_at DESC
-      `);
+    const users = await User.find()
+      .populate("role", "name description")
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      data: result.recordset,
+      data: users,
     });
   } catch (err) {
     res.status(500).json({
@@ -28,29 +21,24 @@ export async function getUsers(req, res) {
 
 export async function createUser(req, res) {
   try {
-    const { username, email, password, role_id } = req.validated;
-    const pool = getPool();
+    const { username, email, password, role } = req.validated;
 
-    const result = await pool
-      .request()
-      .input("username", sql.NVarChar, username)
-      .input("email", sql.NVarChar, email)
-      .input("password", sql.NVarChar, password)
-      .input("role_id", sql.Int, role_id || null).query(`
-        INSERT INTO Users (username, email, password, role_id)
-        OUTPUT INSERTED.id
-        VALUES (@username, @email, @password, @role_id)
-      `);
+    const newUser = new User({
+      username,
+      email,
+      password,
+      role,
+    });
 
-    const newId = result.recordset[0].id;
+    await newUser.save();
 
     res.status(201).json({
       success: true,
       message: "User created successfully",
-      data: { id: newId },
+      data: newUser,
     });
   } catch (err) {
-    if (err.message.includes("UNIQUE")) {
+    if (err.code === 11000) {
       return res.status(400).json({
         success: false,
         message: "Username or email already exists",
@@ -67,42 +55,25 @@ export async function createUser(req, res) {
 export async function updateUser(req, res) {
   try {
     const { id } = req.params;
-    const { username, email, password, role_id } = req.validated;
-    const pool = getPool();
+    const { username, email, password, role } = req.validated;
 
-    const fields = [];
-    const request = pool.request();
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username, email, password, role },
+      { new: true, runValidators: true, omitUndefined: true }
+    ).populate("role", "name description");
 
-    request.input("id", sql.Int, id);
-
-    if (username !== undefined) {
-      fields.push("username = @username");
-      request.input("username", sql.NVarChar, username);
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
-    if (email !== undefined) {
-      fields.push("email = @email");
-      request.input("email", sql.NVarChar, email);
-    }
-    if (password !== undefined) {
-      fields.push("password = @password");
-      request.input("password", sql.NVarChar, password);
-    }
-    if (role_id !== undefined) {
-      fields.push("role_id = @role_id");
-      request.input("role_id", sql.Int, role_id);
-    }
-
-    fields.push("updated_at = GETUTCDATE()");
-
-    await request.query(`
-      UPDATE Users
-      SET ${fields.join(", ")}
-      WHERE id = @id
-    `);
 
     res.json({
       success: true,
       message: "User updated successfully",
+      data: updatedUser,
     });
   } catch (err) {
     res.status(500).json({
@@ -116,12 +87,15 @@ export async function updateUser(req, res) {
 export async function deleteUser(req, res) {
   try {
     const { id } = req.params;
-    const pool = getPool();
 
-    await pool.request().input("id", sql.Int, id).query(`
-        DELETE FROM Users
-        WHERE id = @id
-      `);
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     res.json({
       success: true,
