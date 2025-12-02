@@ -23,8 +23,8 @@ const options = {
         description: "Development server",
       },
       {
-        url: "https://api.blogsphere.com",
-        description: "Production server",
+        url: "https://blogsphere-ruddy.vercel.app",
+        description: "Production server (Vercel)",
       },
     ],
     tags: [
