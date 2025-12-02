@@ -1,33 +1,23 @@
-import { getPool } from "../config/database.js";
-import sql from "mssql";
-
 /**
- * Base controller with common CRUD operations
+ * Base controller with common CRUD operations for MongoDB
  * Reduces code duplication across all controllers
  */
 export class BaseController {
-  constructor(tableName, resourceName) {
-    this.tableName = tableName;
+  constructor(Model, resourceName) {
+    this.Model = Model;
     this.resourceName = resourceName;
   }
 
   /**
    * Get all records
    */
-  async getAll(req, res, customQuery = null) {
+  async getAll(req, res) {
     try {
-      const pool = getPool();
-      const query =
-        customQuery ||
-        `
-        SELECT * FROM ${this.tableName}
-        ORDER BY created_at DESC
-      `;
-      const result = await pool.request().query(query);
+      const data = await this.Model.find().sort({ createdAt: -1 });
 
       res.json({
         success: true,
-        data: result.recordset,
+        data,
       });
     } catch (err) {
       res.status(500).json({
@@ -43,34 +33,16 @@ export class BaseController {
    */
   async create(req, res, fields) {
     try {
-      const pool = getPool();
-      const request = pool.request();
-
-      const columns = [];
-      const values = [];
-
-      // Build dynamic query based on fields
-      for (const [key, value] of Object.entries(fields)) {
-        columns.push(key);
-        values.push(`@${key}`);
-        request.input(key, sql.NVarChar, value || null);
-      }
-
-      const result = await request.query(`
-        INSERT INTO ${this.tableName} (${columns.join(", ")})
-        OUTPUT INSERTED.id
-        VALUES (${values.join(", ")})
-      `);
-
-      const newId = result.recordset[0].id;
+      const newDoc = new this.Model(fields);
+      await newDoc.save();
 
       res.status(201).json({
         success: true,
         message: `${this.resourceName} created successfully`,
-        data: { id: newId, ...fields },
+        data: newDoc,
       });
     } catch (err) {
-      if (err.message.includes("UNIQUE")) {
+      if (err.code === 11000) {
         return res.status(400).json({
           success: false,
           message: `${this.resourceName} already exists`,
@@ -90,31 +62,24 @@ export class BaseController {
   async update(req, res, fields) {
     try {
       const { id } = req.params;
-      const pool = getPool();
-      const request = pool.request();
 
-      const setClauses = [];
-      request.input("id", sql.Int, id);
+      const updatedDoc = await this.Model.findByIdAndUpdate(
+        id,
+        { $set: fields },
+        { new: true, runValidators: true }
+      );
 
-      // Build dynamic SET clause
-      for (const [key, value] of Object.entries(fields)) {
-        if (value !== undefined) {
-          setClauses.push(`${key} = @${key}`);
-          request.input(key, sql.NVarChar, value);
-        }
+      if (!updatedDoc) {
+        return res.status(404).json({
+          success: false,
+          message: `${this.resourceName} not found`,
+        });
       }
-
-      setClauses.push("updated_at = GETUTCDATE()");
-
-      await request.query(`
-        UPDATE ${this.tableName}
-        SET ${setClauses.join(", ")}
-        WHERE id = @id
-      `);
 
       res.json({
         success: true,
         message: `${this.resourceName} updated successfully`,
+        data: updatedDoc,
       });
     } catch (err) {
       res.status(500).json({
@@ -131,12 +96,15 @@ export class BaseController {
   async delete(req, res) {
     try {
       const { id } = req.params;
-      const pool = getPool();
 
-      await pool.request().input("id", sql.Int, id).query(`
-        DELETE FROM ${this.tableName}
-        WHERE id = @id
-      `);
+      const deletedDoc = await this.Model.findByIdAndDelete(id);
+
+      if (!deletedDoc) {
+        return res.status(404).json({
+          success: false,
+          message: `${this.resourceName} not found`,
+        });
+      }
 
       res.json({
         success: true,
@@ -146,39 +114,6 @@ export class BaseController {
       res.status(500).json({
         success: false,
         message: `Error deleting ${this.resourceName}`,
-        error: err.message,
-      });
-    }
-  }
-
-  /**
-   * Get a single record by ID
-   */
-  async getById(req, res) {
-    try {
-      const { id } = req.params;
-      const pool = getPool();
-
-      const result = await pool.request().input("id", sql.Int, id).query(`
-        SELECT * FROM ${this.tableName}
-        WHERE id = @id
-      `);
-
-      if (result.recordset.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: `${this.resourceName} not found`,
-        });
-      }
-
-      res.json({
-        success: true,
-        data: result.recordset[0],
-      });
-    } catch (err) {
-      res.status(500).json({
-        success: false,
-        message: `Error fetching ${this.resourceName}`,
         error: err.message,
       });
     }

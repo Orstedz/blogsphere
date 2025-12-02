@@ -1,6 +1,7 @@
 import { BaseController } from "./baseController.js";
+import Category from "../models/Category.js";
 
-const controller = new BaseController("Categories", "Category");
+const controller = new BaseController(Category, "Category");
 
 export async function getCategories(req, res) {
   return controller.getAll(req, res);
@@ -18,8 +19,4 @@ export async function updateCategory(req, res) {
 
 export async function deleteCategory(req, res) {
   return controller.delete(req, res);
-}
-
-export async function getCategoryById(req, res) {
-  return controller.getById(req, res);
 }

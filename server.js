@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
-import { connectToDatabase, closePool } from "./config/database.js";
+import { connectToDatabase, closeConnection } from "./config/database.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { swaggerSpec } from "./config/swagger.js";
 import categoriesRouter from "./routes/categories.js";
@@ -49,6 +49,10 @@ app.use("/api/series", seriesRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/roles", rolesRouter);
 
+app.get("/", (req, res) => {
+  res.json({ message: "BlogSphere API is running", version: "1.0.0" });
+});
+
 // Error handling
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -70,7 +74,7 @@ async function startServer() {
 // Shutdown
 process.on("SIGINT", async () => {
   console.log("\nShutting down...");
-  await closePool();
+  await closeConnection();
   process.exit(0);
 });
 

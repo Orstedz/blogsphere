@@ -55,7 +55,7 @@ const options = {
           type: "object",
           required: ["name"],
           properties: {
-            id: {
+            _id: {
               type: "integer",
               description: "Unique identifier",
               example: 1,
@@ -71,12 +71,12 @@ const options = {
               description: "Category description",
               example: "Articles about technology and innovation",
             },
-            created_at: {
+            createdAt: {
               type: "string",
               format: "date-time",
               description: "Creation timestamp",
             },
-            updated_at: {
+            updatedAt: {
               type: "string",
               format: "date-time",
               description: "Last update timestamp",
@@ -87,7 +87,7 @@ const options = {
           type: "object",
           required: ["title", "content"],
           properties: {
-            id: {
+            _id: {
               type: "integer",
               description: "Unique identifier",
               example: 1,
@@ -103,19 +103,19 @@ const options = {
               example:
                 "React is a JavaScript library for building user interfaces...",
             },
-            category_id: {
+            category: {
               type: "integer",
               nullable: true,
               description: "Associated category ID",
               example: 1,
             },
-            series_id: {
+            series: {
               type: "integer",
               nullable: true,
               description: "Associated series ID",
               example: 1,
             },
-            author_id: {
+            author: {
               type: "integer",
               description: "Author user ID",
               example: 1,
@@ -126,11 +126,11 @@ const options = {
               description: "Post publication status",
               example: "Published",
             },
-            created_at: {
+            createdAt: {
               type: "string",
               format: "date-time",
             },
-            updated_at: {
+            updatedAt: {
               type: "string",
               format: "date-time",
             },
@@ -140,7 +140,7 @@ const options = {
           type: "object",
           required: ["name"],
           properties: {
-            id: {
+            _id: {
               type: "integer",
               description: "Unique identifier",
               example: 1,
@@ -156,11 +156,11 @@ const options = {
               description: "Series description",
               example: "A comprehensive guide to React basics",
             },
-            created_at: {
+            createdAt: {
               type: "string",
               format: "date-time",
             },
-            updated_at: {
+            updatedAt: {
               type: "string",
               format: "date-time",
             },
@@ -170,7 +170,7 @@ const options = {
           type: "object",
           required: ["username", "email", "password"],
           properties: {
-            id: {
+            _id: {
               type: "integer",
               description: "Unique identifier",
               example: 1,
@@ -190,17 +190,17 @@ const options = {
               description: "User password (hashed in storage)",
               example: "SecurePass123!",
             },
-            role_id: {
+            role: {
               type: "integer",
               nullable: true,
               description: "Assigned role ID",
               example: 1,
             },
-            created_at: {
+            createdAt: {
               type: "string",
               format: "date-time",
             },
-            updated_at: {
+            updatedAt: {
               type: "string",
               format: "date-time",
             },
@@ -210,7 +210,7 @@ const options = {
           type: "object",
           required: ["name"],
           properties: {
-            id: {
+            _id: {
               type: "integer",
               description: "Unique identifier",
               example: 1,
@@ -226,11 +226,11 @@ const options = {
               description: "Role description",
               example: "Full system access and management",
             },
-            created_at: {
+            createdAt: {
               type: "string",
               format: "date-time",
             },
-            updated_at: {
+            updatedAt: {
               type: "string",
               format: "date-time",
             },

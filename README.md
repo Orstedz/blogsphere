@@ -1,36 +1,150 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BlogSphere Backend API
 
-## Getting Started
+Professional blogging platform backend built with Node.js, Express, and SQL Server.
 
-First, run the development server:
+## Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+BlogSphere Backend provides RESTful API endpoints for managing:
+
+- Posts and Categories
+- Series and Tags
+- Users and Roles
+- Content management and publishing
+
+## Tech Stack
+
+- **Runtime**: Node.js (ES Modules)
+- **Framework**: Express.js
+- **Database**: SQL Server (Code-first migrations)
+- **Validation**: Joi
+- **Security**: Helmet, CORS
+
+## Installation
+
+### Prerequisites
+
+- Node.js 18+
+- SQL Server 2019+
+- npm or yarn
+
+### Setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yourusername/blogsphere.git
+   cd blogsphere
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Create `.env` file in the root directory:
+
+   ```env
+   PORT=3001
+   DB_SERVER=your_server_address
+   DB_NAME=blogsphere
+   DB_USER=your_username
+   DB_PASSWORD=your_password
+   DB_ENCRYPT=true
+   NODE_ENV=development
+   ```
+
+4. Run database migrations:
+
+   ```bash
+   npm run migrate
+   ```
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+The API will be available at `http://localhost:3001`
+
+## API Endpoints
+
+### Categories
+
+- `GET /api/categories` - List all categories
+- `POST /api/categories` - Create category
+- `PUT /api/categories/:id` - Update category
+- `DELETE /api/categories/:id` - Delete category
+
+### Posts
+
+- `GET /api/posts` - List all posts
+- `POST /api/posts` - Create post
+- `PUT /api/posts/:id` - Update post
+- `DELETE /api/posts/:id` - Delete post
+
+### Series
+
+- `GET /api/series` - List all series
+- `POST /api/series` - Create series
+- `PUT /api/series/:id` - Update series
+- `DELETE /api/series/:id` - Delete series
+
+### Users
+
+- `GET /api/users` - List all users
+- `POST /api/users` - Create user
+- `PUT /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Delete user
+
+### Roles
+
+- `GET /api/roles` - List all roles
+- `POST /api/roles` - Create role
+- `PUT /api/roles/:id` - Update role
+- `DELETE /api/roles/:id` - Delete role
+
+## Development
+
+- `npm run dev` - Start with hot reload
+- `npm run migrate` - Run database migrations
+
+## Production
+
+- `npm start` - Start production server
+
+## Project Structure
+
+```
+blogsphere/
+├── config/
+│   └── database.js
+├── routes/
+│   ├── categories.js
+│   ├── posts.js
+│   ├── series.js
+│   ├── users.js
+│   └── roles.js
+├── controllers/
+│   ├── categoryController.js
+│   ├── postController.js
+│   ├── seriesController.js
+│   ├── userController.js
+│   └── roleController.js
+├── models/
+│   └── schema.sql
+├── middleware/
+│   ├── errorHandler.js
+│   └── validation.js
+├── scripts/
+│   └── migrate.js
+├── server.js
+├── .env
+├── .gitignore
+├── package.json
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## License
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
