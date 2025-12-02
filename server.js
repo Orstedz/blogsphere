@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
 import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
 import { connectToDatabase, closeConnection } from "./config/database.js";
@@ -21,16 +20,12 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Swagger Documentation with explicit serving
-const swaggerUiAssetPath = swaggerUi.getAbsoluteFSPath();
-app.use('/api-docs', express.static(swaggerUiAssetPath));
+// Swagger Documentation
 app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     customSiteTitle: "BlogSphere API Documentation",
-    customCssUrl: null,
-    customJs: null,
   })
 );
 
