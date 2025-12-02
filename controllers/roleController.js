@@ -1,6 +1,7 @@
 import { BaseController } from "./baseController.js";
+import Role from "../models/Role.js";
 
-const controller = new BaseController("Roles", "Role");
+const controller = new BaseController(Role, "Role");
 
 export async function getRoles(req, res) {
   return controller.getAll(req, res);
@@ -18,8 +19,4 @@ export async function updateRole(req, res) {
 
 export async function deleteRole(req, res) {
   return controller.delete(req, res);
-}
-
-export async function getRoleById(req, res) {
-  return controller.getById(req, res);
 }
