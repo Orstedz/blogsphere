@@ -21,17 +21,11 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Swagger Documentation - No CSP for Swagger UI
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec, {
-    customSiteTitle: "BlogSphere API Documentation",
-  })
-);
-
-// Apply Helmet after Swagger to avoid CSP blocking Swagger UI
-app.use(
+// Apply Helmet with CSP disabled for /api-docs routes
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api-docs')) {
+    return next();
+  }
   helmet({
     contentSecurityPolicy: {
       directives: {
@@ -41,6 +35,15 @@ app.use(
         imgSrc: ["'self'", "data:", "https:"],
       },
     },
+  })(req, res, next);
+});
+
+// Swagger Documentation
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: "BlogSphere API Documentation",
   })
 );
 
