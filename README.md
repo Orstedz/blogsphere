@@ -15,7 +15,7 @@ BlogSphere Backend provides RESTful API endpoints for managing:
 
 - **Runtime**: Node.js (ES Modules)
 - **Framework**: Express.js
-- **Database**: SQL Server (Code-first migrations)
+- **Database**: MongoDB
 - **Validation**: Joi
 - **Security**: Helmet, CORS
 
@@ -24,7 +24,7 @@ BlogSphere Backend provides RESTful API endpoints for managing:
 ### Prerequisites
 
 - Node.js 18+
-- SQL Server 2019+
+- MongoDB
 - npm or yarn
 
 ### Setup
